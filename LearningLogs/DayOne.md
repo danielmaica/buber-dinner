@@ -58,7 +58,18 @@
 
 ---
 
-### 7. Próximos Passos
+### 7. Pacotes NuGet Utilizados
+
+- `Microsoft.AspNetCore.Authentication.JwtBearer`
+- `Microsoft.IdentityModel.Tokens`
+- `System.IdentityModel.Tokens.Jwt`
+- `Microsoft.Extensions.Options`
+- `Microsoft.AspNetCore.Mvc`
+- Outros pacotes padrão do .NET para API e DI
+
+---
+
+### 8. Próximos Passos
 
 - Expandir funcionalidades (ex: gerenciamento de jantares)
 - Implementar persistência real de usuários
