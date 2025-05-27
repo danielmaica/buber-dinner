@@ -1,48 +1,56 @@
 using BuberDinner.Application.Common.Interfaces.Authentication;
+using BuberDinner.Application.Common.Interfaces.Persistence;
+using BuberDinner.Domain.Entities;
 
 namespace BuberDinner.Application.Services.Authentication;
 
 public class AuthenticationService : IAuthenticationService
 {
   private readonly IJwtTokenGenerator _jwtTokenGenerator;
+  private readonly IUserRepository _userRepository;
 
-  public AuthenticationService(IJwtTokenGenerator jwtTokenGenerator)
+  public AuthenticationService(IJwtTokenGenerator jwtTokenGenerator, IUserRepository userRepository)
   {
     _jwtTokenGenerator = jwtTokenGenerator;
+    _userRepository = userRepository;
   }
 
   public AuthenticationResult Register(string firstName, string lastName, string email, string password)
   {
-    // ToDo: Check if user already exists
+    if (_userRepository.GetUserByEmail(email) is not null)
+      throw new Exception("User with given email already exists.");
 
-    // Create user (generate unique ID, hash password, etc.)
+    User user = new()
+    {
+      FirstName = firstName,
+      LastName = lastName,
+      Email = email,
+      Password = password
+    };
 
-    // Create JWT token (using a JWT token generator service)
-    Guid userId = Guid.NewGuid();
-    string token = _jwtTokenGenerator.GenerateToken(
-      userId,
-      email,
-      firstName,
-      lastName
-    );
+    _userRepository.AddUser(user);
+
+    string token = _jwtTokenGenerator.GenerateToken(user);
 
     return new AuthenticationResult(
-      Guid.NewGuid(),
-      firstName,
-      lastName,
-      email,
-     token
+      user,
+      token
     );
   }
 
   public AuthenticationResult Login(string email, string password)
   {
+    if (_userRepository.GetUserByEmail(email) is not User user)
+      throw new Exception("User with given email does not exist.");
+
+    if (user.Password != password)
+      throw new Exception("Invalid password.");
+
+    string token = _jwtTokenGenerator.GenerateToken(user);
+
     return new AuthenticationResult(
-      Guid.NewGuid(),
-      "FirstName",
-      "LastName",
-      email,
-      Guid.NewGuid().ToString()
+      user,
+      token
     );
   }
 }
